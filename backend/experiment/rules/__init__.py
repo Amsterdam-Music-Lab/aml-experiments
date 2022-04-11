@@ -5,6 +5,7 @@ from .short_long import ShortLong
 from .demo_taf import DemoTAF
 from .demo_two_song import DemoTwoSong
 from .eurovision_2020 import Eurovision2020
+from .eurovision_2022 import Eurovision2022
 from .kuiper_2020 import Kuiper2020
 from .beijaert_2021 import Beijaert2021
 from .huang_2021 import Huang2021
@@ -35,6 +36,7 @@ EXPERIMENT_RULES = {
     ShortLong.ID: ShortLong,
     # ShortLongTags.ID: ShortLongTags,
     Eurovision2020.ID: Eurovision2020,
+    Eurovision2022.ID: Eurovision2022,
     Kuiper2020.ID: Kuiper2020,
     Beijaert2021.ID: Beijaert2021,
     Huang2021.ID: Huang2021,
