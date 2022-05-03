@@ -18,12 +18,11 @@ const FeedbackForm = ({ formActive, form, buttonLabel, skipLabel, isSkippable, o
     };
 
     const onChange = (value, question_key) => {
-        console.log(form[question_key].value);
         form[question_key].value = value;
         if (form[question_key].submits) {
             onSubmit(form);
         }
-        if (form.filter( formElement => formElement.value ) === form.length) {
+        if (form.filter( formElement => formElement.value ).length === form.length) {
             setFormValid(true);
         }
     };
@@ -43,13 +42,14 @@ const FeedbackForm = ({ formActive, form, buttonLabel, skipLabel, isSkippable, o
                 )
                 )}
                 {/* Continue button */}
-                {showSubmitButtons && formValid && (
+                {showSubmitButtons && (
                 <Button
                     onClick={() => {
                         onSubmit();
                     }}
                     className={"btn-primary anim anim-fade-in anim-speed-500"}
                     title={buttonLabel}
+                    active={formValid}
                 />)}
 
                 {/* Skip button */}
