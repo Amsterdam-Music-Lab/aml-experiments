@@ -138,7 +138,7 @@ class Eurovision2022(Base):
             key='money',
             min_value=1,
             max_value=25,
-            view="RANGE"
+            view="RANGE",
             is_skippable=False,
             submits=False
         )
