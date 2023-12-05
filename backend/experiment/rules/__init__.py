@@ -19,6 +19,7 @@ from .rhythm_discrimination import RhythmDiscrimination
 from .rhythm_experiment_series import RhythmExperimentSeries
 from .rhythm_experiment_series_mri import RhythmExperimentSeriesMRI
 from .rhythm_experiment_series_unpaid import RhythmExperimentSeriesUnpaid
+from .same_different import SameDifferent
 from .speech2song import Speech2Song
 from .thats_my_song import ThatsMySong
 from .toontjehoger_home import ToontjeHogerHome
@@ -54,6 +55,7 @@ EXPERIMENT_RULES = {
     ListeningConditions.ID: ListeningConditions,
     Huang2022.ID: Huang2022,
     Categorization.ID: Categorization,
+    SameDifferent.ID: SameDifferent,
     ToontjeHogerHome.ID: ToontjeHogerHome,
     ToontjeHoger1Mozart.ID: ToontjeHoger1Mozart,
     ToontjeHoger2Preverbal.ID: ToontjeHoger2Preverbal,

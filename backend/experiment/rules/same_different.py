@@ -1,0 +1,211 @@
+import random
+import logging
+
+from django.utils.translation import gettext_lazy as _
+
+from experiment.actions.utils import final_action_with_optional_button, render_feedback_trivia
+from experiment.rules.util.practice import practice_explainer, practice_again_explainer, start_experiment_explainer
+from experiment.actions import Trial, Explainer, Playlist, StartSession, Step
+from experiment.actions.playback import Playback
+from experiment.actions.form import ChoiceQuestion, Form
+
+from result.utils import prepare_result
+
+from .base import Base
+
+logger = logging.getLogger(__name__)
+
+
+class SameDifferent(Base):
+    ID = 'SAME_DIFFERENT'
+
+    def first_round(self, experiment):
+        """Create data for the first experiment rounds"""
+        explainer = intro_explainer()
+
+        explainer2 = practice_explainer()
+
+        playlist = Playlist()
+
+        start_session = StartSession()
+
+        return [
+            explainer,
+            explainer2,
+            playlist,
+            start_session
+        ]
+
+    def next_round(self, session, request_session=None):
+        next_round_number = session.get_next_round()
+
+        if next_round_number == 1:
+            plan_stimuli(session)
+
+        return next_trial_actions(
+            session, next_round_number, request_session)
+    
+
+def next_trial_actions(session, round_number, request_session):
+    """
+    Get the next trial action, depending on the round number
+    """
+    actions = []
+
+    if session.final_score == 0:
+        # practice: add feedback on previous result
+        previous_results = session.result_set.order_by('-created_at')
+        if previous_results.count():
+            same = previous_results.first().expected_response == 'SAME'
+            actions.append(
+                response_explainer(previous_results.first().score, same)
+            )
+        if round_number == 5:
+            total_score = sum(
+                [res.score for res in previous_results.all()[:4]])
+            if total_score < 2:
+                # start practice over
+                actions.append(practice_again_explainer())
+                actions.append(intro_explainer())
+                session.result_set.all().delete()
+                session.save()
+            else:
+                # experiment starts
+                session.final_score = 1
+                session.save()
+                explainer = start_experiment_explainer()
+                explainer.steps.pop(0)
+                actions.append(explainer)
+
+    try:
+        section = session.playlist.section_set.filter(
+            song__name__startswith=condition['rhythm']).filter(
+            tag=condition['tag']).get(
+            group=condition['group']
+        )
+    except:
+        return actions
+
+    expected_response = 'SAME' if condition['group'] == '1' else 'DIFFERENT'
+    key = 'same'
+    question = ChoiceQuestion(
+        key=key,
+        question=_(
+            "Is the third rhythm the SAME or DIFFERENT?"),
+        choices={
+            'SAME': _('SAME'),
+            'DIFFERENT': _('DIFFERENT')
+        },
+        view='BUTTON_ARRAY',
+        result_id=prepare_result(key, session, expected_response=expected_response, scoring_rule='CORRECTNESS'),
+        submits=True
+    )
+    form = Form([question])
+    playback = Playback([section])
+    if round_number < 5:
+        title = _('practice')
+    else:
+        title = _('trial %(index)d of %(total)d') % (
+            {'index': round_number - 4, 'total': len(plan) - 4})
+    view = Trial(
+        playback=playback,
+        feedback_form=form,
+        title=_('Rhythm discrimination: %s' % (title)),
+        config={
+            'listen_first': True,
+            'response_time': section.duration + .5
+        }
+    )
+
+    actions.append(view)
+    return actions
+
+
+def plan_stimuli(session):
+    """ select 60 stimuli, of which 30 are standard, 30 deviant.
+    rhythm refers to the type of rhythm,
+    tag refers to the tempo,
+    group refers to the condition (0 is deviant, 1 is standard)
+    """
+    metric = STIMULI['metric']
+    nonmetric = STIMULI['nonmetric']
+    tempi = [150, 160, 170, 180, 190, 200]
+    tempi = [str(t) for t in tempi]
+    metric_deviants = [{'rhythm': m, 'tag': random.choice(
+        tempi), 'group': '0'} for m in metric['deviant']]
+    metric_standard = [{'rhythm': m, 'tag': random.choice(
+        tempi), 'group': '1'} for m in metric['standard']]
+    nonmetric_deviants = [{'rhythm': m, 'tag': random.choice(
+        tempi), 'group': '0'} for m in nonmetric['deviant']]
+    nonmetric_standard = [{'rhythm': m, 'tag': random.choice(
+        tempi), 'group': '1'} for m in nonmetric['standard']]
+    practice = [
+        {'rhythm': STIMULI['practice']['metric']['standard'],
+            'tag': random.choice(tempi), 'group': '1'},
+        {'rhythm': STIMULI['practice']['metric']['deviant'],
+            'tag': random.choice(tempi), 'group': '0'},
+        {'rhythm': STIMULI['practice']['nonmetric']['standard'],
+            'tag': random.choice(tempi), 'group': '1'},
+        {'rhythm': STIMULI['practice']['nonmetric']['deviant'],
+            'tag': random.choice(tempi), 'group': '0'},
+    ]
+    experiment = metric_deviants + metric_standard + \
+        nonmetric_deviants + nonmetric_standard
+    random.shuffle(experiment)
+    plan = practice + experiment
+    session.save_json_data({'plan': plan})
+    session.save()
+
+
+def intro_explainer():
+    return Explainer(
+        instruction=_(
+            'In this test you will hear the same rhythm twice. After that, you will hear a third rhythm.'),
+        steps=[
+            Step(_(
+                "Your task is to decide whether this third rhythm is the SAME as the first two rhythms or DIFFERENT.")),
+            Step(_("Remember: try not to move or tap along with the sounds")),
+            Step(_(
+                'This test will take around 6 minutes to complete. Try to stay focused for the entire test!'))
+        ],
+        step_numbers=True,
+        button_label='Ok'
+    )
+
+
+def response_explainer(correct, same, button_label=_('Next fragment')):
+    if correct:
+        if same:
+            instruction = _(
+                'The third rhythm is the SAME. Your response was CORRECT.')
+        else:
+            instruction = _(
+                'The third rhythm is DIFFERENT. Your response was CORRECT.')
+    else:
+        if same:
+            instruction = _(
+                'The third rhythm is the SAME. Your response was INCORRECT.')
+        else:
+            instruction = _(
+                'The third rhythm is DIFFERENT. Your response was INCORRECT.')
+    return Explainer(
+        instruction=instruction,
+        steps=[],
+        button_label=button_label
+    )
+
+
+def finalize_experiment(session, request_session):
+    # we had 4 practice trials and 60 experiment trials
+    percentage = (sum([res.score for res in session.result_set.all()]
+                      ) / session.result_set.count()) * 100
+    session.finish()
+    session.save()
+    feedback = _("Well done! You've answered {} percent correctly!").format(
+        percentage)
+    trivia = _("One reason for the \
+        weird beep-tones in this test (instead of some nice drum-sound) is that it is used very often\
+        in brain scanners, which make a lot of noise. The beep-sound helps people in the scanner \
+        to hear the rhythm really well.")
+    final_text = render_feedback_trivia(feedback, trivia)
+    return final_action_with_optional_button(session, final_text, request_session)
