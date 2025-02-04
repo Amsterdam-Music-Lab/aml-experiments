@@ -341,39 +341,6 @@ A list of `Feedback` objects that belong to this `Block`.
     - `text`: The feedback on this block given by an anonymous participant.
     - `block`: Foreign key `fk` relates to the `Block` object.
 
-## Export selected result data in CSV format
-
-
-Using the admin interface you can export selected result data from the sessions from a specific block of an experiment as a `CSV` file.
-
-To do so, navigate to [localhost:8000/admin/experiment/block](http://localhost:8000/admin/experiment/block) and click the `Export CSV` button next to the block that you want to export.
-
-You will be presented with a screen that lets you choose the fields that you want to export, as well as the lay-out for the data in the CSV file:
-
-![export-csv](https://github.com/user-attachments/assets/d2f603ca-b55d-4911-9de0-11ef6a69b326)
-
-1. Choose the [`Session`](#sessionsjson) and related [`Participant`](#participantsjson) fields that you want to export.
-    - [Click here](#sessionsjson) for a description of the raw `Session` data.
-    - [Click here](#participantsjson) for a description of the raw `Participant` data.
-2. Choose which fields of the `Result` object you want to export.
-    - [Click here](#profilesjson) for a description of the raw profile `Result` data.
-    - [Click here](#resultsjson) for a description of the raw trial `Result` data.
-3. Select options to adjust the format of the exported CSV file.
-4. Select to include the session's [`json_data`](#sessionsjson) field.
-5. Select to convert the session's [`json_data`](#sessionsjson) field to seperate columns. The data in this field will vary in size per block type. Therefore converting this data to columns can in some situations cause the CSV file to become unreadable.
-6. Select to include the trial result's [`json_data`](#resultsjson) field.
-7. Select to convert the trial result's [`json_data`](#resultsjson) field to seperate columns. The data in this field will vary in size per trial type. Therefore converting this data to columns can in some situations cause the CSV file to become unreadable.
-8. Choose a format for the CSV file:
-    - Long format: (*default*)
-        - Each result is a row.
-    - Wide format:
-        - Each session is a row, each result is a column.
-9. Select a settings template here.
-    - We have included a few templates of export settings for typical scenarios.
-10. Click to load the selected template. The selected options on the left will change. You can still select or deselect options before you hit the export button. (11)
-11. The export button! Click this button to download the CSV file from the server.
-12. Go back to the `Block` overview page.
-
 ## The database structure
 [![muscle_db_visualized](https://github.com/user-attachments/assets/f0d97029-ec49-4bcc-8c84-8ed35b0937c0)](https://github.com/user-attachments/assets/f0d97029-ec49-4bcc-8c84-8ed35b0937c0)
 [*click to open the image to enable zoom functionality*](https://github.com/user-attachments/assets/f0d97029-ec49-4bcc-8c84-8ed35b0937c0)
