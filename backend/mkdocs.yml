@@ -67,6 +67,7 @@ nav:
     - 9. Playback and player widgets: '09_Playback_and_player_widgets.md'
     - 10. Create a custom ruleset: '10_Create_custom_ruleset.md'
     - 11. Exporting result data: '11_Exporting_result_data.md'
+    - 13. Running an experiment: '13_Running_an_experiment.md'
   - Preview frontend components:
       - 'Storybook': 'https://amsterdam-music-lab.github.io/MUSCLE/storybook'
   - Ruleset documentation:
