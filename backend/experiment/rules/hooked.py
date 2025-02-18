@@ -30,7 +30,7 @@ class Hooked(BaseRules):
     # if the track continutes in the wrong place: maximal shift forward (in seconds)
     max_jitter = 15
     heard_before_time = 15  # response time for "Have you heard this song in previous rounds?"
-    question_offset = 5  # how many rounds will be presented without questions
+    question_offset = 1  # how many rounds will be presented without questions
     questions = True
     counted_result_keys = ["recognize", "heard_before"]
     play_method = "BUFFER"
@@ -42,19 +42,11 @@ class Hooked(BaseRules):
                 "keys": QUESTION_GROUPS["DEMOGRAPHICS"],
                 "randomize": True,
             },  # 1. Demographic questions (7 questions)
-            {"name": "MSI_OTHER", "keys": ["msi_39_best_instrument"], "randomize": False},
             {
-                "name": "MSI_FG_GENERAL",
-                "keys": QUESTION_GROUPS["MSI_FG_GENERAL"],
-                "randomize": True,
-            },  # 2. General music sophistication
-            {
-                "name": "MSI_ALL",
-                "keys": QUESTION_GROUPS["MSI_ALL"],
-                "randomize": True,
-            },  # 3. Complete music sophistication (20 questions)
-            {"name": "STOMP20", "keys": QUESTION_GROUPS["STOMP20"], "randomize": True},  # 4. STOMP (20 questions)
-            {"name": "TIPI", "keys": QUESTION_GROUPS["TIPI"], "randomize": True},  # 5. TIPI (10 questions)
+                "name": "MSI_OTHER",
+                "keys": ["msi_39_best_instrument"],
+                "randomize": False,
+            },
         ]
 
     def get_intro_explainer(self):
@@ -64,12 +56,12 @@ class Hooked(BaseRules):
             steps=[
                 Step(
                     _(
-                        "Do you recognise the song? Try to sing along. The faster you recognise songs, the more points you can earn."
+                        "Do you recognise the song? Try to hum along. The faster you recognise songs, the more points you can earn."
                     )
                 ),
                 Step(
                     _(
-                        "Do you really know the song? Keep singing or imagining the music while the sound is muted. The music is still playing: you just can’t hear it!"
+                        "Do you really know the song? Keep humming or imagining the music while the sound is muted. The music is still playing: you just can’t hear it!"
                     )
                 ),
                 Step(
